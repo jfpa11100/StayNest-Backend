@@ -1,13 +1,14 @@
 import { User } from "src/users/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Review } from "./review.entity";
+import { Photo } from "./photo.entity";
 
 @Entity('properties')
 export class Property{
     @PrimaryGeneratedColumn('uuid')
     id:string;
     
-    @ManyToOne(() => User, user => user.reviews)
+    @ManyToOne(() => User, user => user.properties)
     user: User
 
     @Column({ type:'varchar' })
@@ -19,8 +20,8 @@ export class Property{
     @Column({ type: 'text' })
     address: string
 
-    @Column({ name:'price_per_night', type: 'text' })
-    pricePerNight: string
+    @Column({ name:'price_per_night', type: 'int' })
+    pricePerNight: number
 
     @Column({ type:'int' })
     bedrooms: number
@@ -39,4 +40,7 @@ export class Property{
 
     @OneToMany(() => Review, review => review.property)
     reviews: Review[]
+
+    @OneToMany(() => Photo, photo => photo.property)
+    photos: Photo[]
 }

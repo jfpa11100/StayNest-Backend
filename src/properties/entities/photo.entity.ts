@@ -7,7 +7,7 @@ export class Photo{
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @ManyToOne(() => Property, property => property.reviews,
+    @ManyToOne(() => Property, property => property.photos,
         {
             onDelete: "CASCADE",
         }

@@ -7,7 +7,6 @@ import { Property } from './entities/property.entity';
 import { Review } from './entities/review.entity';
 import { Photo } from './entities/photo.entity';
 import { User } from 'src/users/entities/user.entity';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   controllers: [PropertiesController],

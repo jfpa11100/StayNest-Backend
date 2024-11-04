@@ -1,6 +1,10 @@
 export class CreatePropertyDto {
-    id: string;
-    images:string[];
+    title: string
+    description: string    
+    address: string
+    pricePerNight: number
+    bedrooms: number
+    bathrooms: number
+    capacity: number
     userId:string;
-    reviews:string[]
 }
