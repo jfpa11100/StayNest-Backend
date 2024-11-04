@@ -23,6 +23,7 @@ export class User {
     bio: string
 
     @Column({ 
+        name:'is_owner',
         type: 'bool',
         default: false
      })
