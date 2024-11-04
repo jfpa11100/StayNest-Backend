@@ -26,15 +26,16 @@ export class UsersService {
         ...user,
       });
   
-      const { password: _, ...userCreated } = await this.userRepository.save(newUser)
+      const userCreated = await this.userRepository.save(newUser)
       return {
         username: userCreated.username,
         name: userCreated.name,
-        token: this.getToken({ password, ...userCreated })
+        token: this.getToken({ ...userCreated })
       };
     } catch (error) {
-      if ((error.code = '23505')) {
-        throw new BadRequestException(`${createUserDto.username} ya existe.`);
+      console.log(error)
+      if (error.code === '23505') {
+        throw new BadRequestException(`Usuario ${createUserDto.username} ya existe.`);
       }
       throw new InternalServerErrorException('No se pudo crear el usuario.');
     }
