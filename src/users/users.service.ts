@@ -28,12 +28,12 @@ export class UsersService {
   
       const userCreated = await this.userRepository.save(newUser)
       return {
+        id:userCreated.id,
         username: userCreated.username,
         name: userCreated.name,
         token: this.getToken({ ...userCreated })
       };
     } catch (error) {
-      console.log(error)
       if (error.code === '23505') {
         throw new BadRequestException(`Usuario ${createUserDto.username} ya existe.`);
       }
@@ -48,6 +48,7 @@ export class UsersService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
     return {
+      id: user.id,
       username: user.username,
       name: user.name,
       profilePicture: user.profilePicture,
@@ -56,10 +57,13 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.userRepository.find();
-    return users.map((item) => {
-      const { password, ...users } = item;
-      return users;
+    return await this.userRepository.find({
+      select: {
+        name: true,
+        username: true,
+        profilePicture: true,
+        bio: true,
+      }
     });
   }
 
@@ -87,6 +91,7 @@ export class UsersService {
         }
       })
     } catch (error) {
+      if (error.code === '22P02') throw new BadRequestException(`No se econtró usuario con id: ${id}`)
       throw new BadRequestException('El usuario no pudo ser actualizado');
     }
   }
