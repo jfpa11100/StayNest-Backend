@@ -35,6 +35,7 @@ export class UsersService {
       };
     } catch (error) {
       if (error.code === '23505') {
+        if (error.constraint === 'UQ_97672ac88f789774dd47f7c8be3') throw new BadRequestException(`Correo ${createUserDto.email} está asignado a otra cuenta.`);
         throw new BadRequestException(`Usuario ${createUserDto.username} ya existe.`);
       }
       throw new InternalServerErrorException('No se pudo crear el usuario.');
@@ -45,7 +46,7 @@ export class UsersService {
     const { username, password } = loginUser;
     const user = await this.userRepository.findOneBy({ username });
     if (!user || this.isNotValid(password, user.password)) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Credenciales Inválidas');
     }
     return {
       id: user.id,
