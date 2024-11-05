@@ -41,6 +41,6 @@ export class Property{
     @OneToMany(() => Review, review => review.property)
     reviews: Review[]
 
-    @OneToMany(() => Photo, photo => photo.property)
+    @OneToMany(() => Photo, photo => photo.property, { cascade: true })
     photos: Photo[]
 }

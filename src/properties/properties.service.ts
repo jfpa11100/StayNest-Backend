@@ -4,6 +4,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Property } from './entities/property.entity';
 import { Repository } from 'typeorm';
+import { Photo } from './entities/photo.entity';
 
 @Injectable()
 export class PropertiesService {
@@ -11,14 +12,17 @@ export class PropertiesService {
   constructor(
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
+    @InjectRepository(Photo)
+    private photoRepository: Repository<Photo>,
   ) {}
 
   async create(createPropertyDto: CreatePropertyDto) {
     try {
-      const { userId, ...propertyData } = createPropertyDto;
+      const { userId, photos, ...propertyData } = createPropertyDto;
       const newProperty = this.propertyRepository.create({
         ...propertyData,
-        user:{id: userId}
+        user:{id: userId},
+        photos: photos.map(photo => this.photoRepository.create(photo)),
       });
       return await this.propertyRepository.save(newProperty)
     } catch (error) {
@@ -30,14 +34,22 @@ export class PropertiesService {
   }
 
   async findAll() {
-    return await this.propertyRepository.find({
+    const properties = await this.propertyRepository.find({
       select: {
         id:true,
         title: true,
         address: true,
         pricePerNight: true
-      }
+      },
+      relations: ['photos']
     });
+    return properties.map(p => ({
+      id: p.id,
+      title: p.title,
+      address: p.address,
+      pricePerNight: p.pricePerNight,
+      photos: p.photos.length > 0 ? [p.photos[0]] : []
+    }))
   }
   
   async findOne(id: string) {
