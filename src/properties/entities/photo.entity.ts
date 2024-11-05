@@ -7,11 +7,7 @@ export class Photo{
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @ManyToOne(() => Property, property => property.photos,
-        {
-            onDelete: "CASCADE",
-        }
-    )
+    @ManyToOne(() => Property, property => property.photos,{ onDelete: "CASCADE" })
     property: Property
 
     @Column({ type:'varchar' })

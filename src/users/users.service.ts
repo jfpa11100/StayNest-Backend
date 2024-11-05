@@ -50,9 +50,10 @@ export class UsersService {
     }
     return {
       id: user.id,
-      username: user.username,
       name: user.name,
+      username: user.username,
       profilePicture: user.profilePicture,
+      isOwner: user.isOwner,
       token: this.getToken(user),
     };
   }
