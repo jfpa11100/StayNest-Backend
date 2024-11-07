@@ -35,7 +35,7 @@ export class UsersService {
       };
     } catch (error) {
       if (error.code === '23505') {
-        if (error.constraint === 'UQ_97672ac88f789774dd47f7c8be3') throw new BadRequestException(`Correo ${createUserDto.email} está asignado a otra cuenta.`);
+        if (error.constraint === 'UQ_97672ac88f789774dd47f7c8be3') throw new BadRequestException(`Correo ${createUserDto.email} ya está asignado a otra cuenta.`);
         throw new BadRequestException(`Usuario ${createUserDto.username} ya existe.`);
       }
       throw new InternalServerErrorException('No se pudo crear el usuario.');
@@ -44,7 +44,9 @@ export class UsersService {
 
   async login(loginUser: LoginUserDto) {
     const { username, password } = loginUser;
-    const user = await this.userRepository.findOneBy({ username });
+    let user = await this.userRepository.findOneBy({ username });
+    if(!user)
+      user = await this.userRepository.findOneBy({ email:username });
     if (!user || this.isNotValid(password, user.password)) {
       throw new UnauthorizedException('Credenciales Inválidas');
     }
@@ -74,27 +76,35 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUser: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     try {
+      const {userId, ...updateUser} = updateUserDto
+      if(id !== userId){
+        throw new BadRequestException('El usuario no pudo ser actualizado')
+      }
       if (updateUser.password){
         updateUser.password = bcryptjs.hashSync(updateUser.password) 
       }
       await this.userRepository.update({ id }, updateUser).then((response) => {
           if (!response.affected) throw new BadRequestException("El usuario no pudo ser actualizado");
-        });
+      });
 
-      return this.userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: { id },
         select: {
           name:true,
           username:true,
           email:true,
-          profilePicture:true
+          profilePicture:true,
         }
-      })
+      }) 
+      return { 
+          ...user,
+          token: this.getToken(user)
+        }
     } catch (error) {
       if (error.code === '22P02') throw new BadRequestException(`No se econtró usuario con id: ${id}`)
-      throw new BadRequestException('El usuario no pudo ser actualizado');
+      throw new BadRequestException('El usuario no fue actualizado');
     }
   }
 
