@@ -34,22 +34,16 @@ export class PropertiesService {
   }
 
   async findAll() {
-    const properties = await this.propertyRepository.find({
+    return await this.propertyRepository.find({
       select: {
         id:true,
         title: true,
         address: true,
-        pricePerNight: true
+        pricePerNight: true,
+        capacity: true
       },
       relations: ['photos']
     });
-    return properties.map(p => ({
-      id: p.id,
-      title: p.title,
-      address: p.address,
-      pricePerNight: p.pricePerNight,
-      photos: p.photos.length > 0 ? [p.photos[0]] : []
-    }))
   }
   
   async findOne(id: string) {
