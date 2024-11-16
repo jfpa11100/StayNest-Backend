@@ -1,21 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Booking } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
 export class BookingsService {
-  create(createBookingDto: CreateBookingDto) {
-    return 'This action adds a new booking';
+  constructor(
+    @InjectRepository(Booking)
+    private readonly bookingRepository: Repository<Booking>,
+  ) {}
+
+  async create(createBookingDto: CreateBookingDto) {
+    try {
+      const { userId, propertyId, ...bookingData } = createBookingDto;
+      const newBooking = this.bookingRepository.create({
+        ...bookingData,
+        user: { id: userId }, 
+        property: { id: propertyId }, 
+      });
+      return await this.bookingRepository.save(newBooking);
+    } catch (error) {
+      console.log(error);
+      if (error.code === '22003') throw new InternalServerErrorException('El precio total es demasiado elevado');
+      if (error.code === '22P02') throw new InternalServerErrorException('Parámetro enviado con el tipo incorrecto');
+      throw new InternalServerErrorException('No se pudo crear la reserva.');
+    }
   }
 
-  findAll() {
-    return `This action returns all bookings`;
+  async findAll() {
+    try {
+      return await this.bookingRepository.find({
+        select: {
+          id: true,
+          startDate: true,
+          endDate: true,
+          totalPrice: true,
+        },
+        relations: ['property', 'user'], 
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('No se pudo obtener la lista de reservas.');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} booking`;
+  async findOne(id: string) {
+    try {
+      const booking = await this.bookingRepository.findOne({
+        where: { id },
+        relations: ['property', 'user'], 
+      });
+      if (!booking) throw new InternalServerErrorException('Reserva no encontrada');
+      return booking;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('No se pudo obtener la reserva.');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
+  async remove(id: string) {
+    try {
+      const result = await this.bookingRepository.delete({ id });
+      if (!result.affected) throw new InternalServerErrorException('La reserva no pudo ser eliminada');
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('No se pudo eliminar la reserva.');
+    }
   }
 }
