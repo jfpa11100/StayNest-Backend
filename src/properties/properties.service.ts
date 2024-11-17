@@ -47,25 +47,34 @@ export class PropertiesService {
   }
   
   async findOne(id: string) {
-    return await this.propertyRepository.findOne({
-      where: { id },
-      relations: ['photos', 'user', 'reviews'],
-      select:{
-        id:true,
-        title: true,
-        description: true,
-        address: true,
-        pricePerNight: true,
-        bedrooms: true,
-        bathrooms: true,
-        capacity: true,
-        user: {
-          name:true,
-          profilePicture: true,
-          email:true
-        }
-      }
-    });
+    const property = await this.propertyRepository.createQueryBuilder('property')
+      .leftJoinAndSelect('property.user', 'user') 
+      .leftJoinAndSelect('property.photos', 'photo') 
+      .leftJoinAndSelect('property.reviews', 'review')
+      .leftJoinAndSelect('review.user', 'reviewUser') 
+      .where('property.id = :id', { id }) 
+      .select([
+        'property.title',        
+        'property.description',    
+        'property.address',      
+        'property.pricePerNight',    
+        'property.bedrooms',     
+        'property.bathrooms',     
+        'property.capacity',     
+        'user.name',             
+        'user.profilePicture',   
+        'user.email',         
+        'photo.url',          
+        'review.comment',        
+        'review.rating',      
+        'review.createdAt',     
+        'reviewUser.name',           
+        'reviewUser.username',       
+        'reviewUser.profilePicture'   
+      ])
+      .getOne();
+  
+    return property;
   }
 
   update(id: string, updatePropertyDto: UpdatePropertyDto) {
