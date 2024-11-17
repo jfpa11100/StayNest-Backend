@@ -49,7 +49,22 @@ export class PropertiesService {
   async findOne(id: string) {
     return await this.propertyRepository.findOne({
       where: { id },
-      relations: ['photo', 'user', 'review'],
+      relations: ['photos', 'user', 'reviews'],
+      select:{
+        id:true,
+        title: true,
+        description: true,
+        address: true,
+        pricePerNight: true,
+        bedrooms: true,
+        bathrooms: true,
+        capacity: true,
+        user: {
+          name:true,
+          profilePicture: true,
+          email:true
+        }
+      }
     });
   }
 
