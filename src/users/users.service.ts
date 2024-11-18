@@ -76,21 +76,18 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(updateUserDto: UpdateUserDto) {
     try {
       const {userId, ...updateUser} = updateUserDto
-      if(id !== userId){
-        throw new BadRequestException('El usuario no pudo ser actualizado')
-      }
       if (updateUser.password){
         updateUser.password = bcryptjs.hashSync(updateUser.password) 
       }
-      await this.userRepository.update({ id }, updateUser).then((response) => {
-          if (!response.affected) throw new BadRequestException("El usuario no pudo ser actualizado");
+      await this.userRepository.update({ id:userId }, updateUser).then(response => {
+        if (!response.affected) throw new BadRequestException("El usuario no pudo ser actualizado");
       });
-
+      
       const user = await this.userRepository.findOne({
-        where: { id },
+        where: { id:userId },
         select: {
           name:true,
           username:true,
@@ -103,7 +100,7 @@ export class UsersService {
           token: this.getToken(user)
         }
     } catch (error) {
-      if (error.code === '22P02') throw new BadRequestException(`No se econtró usuario con id: ${id}`)
+      if (error.code === '22P02') throw new BadRequestException(`No se econtró el usuario`)
       throw new BadRequestException('El usuario no fue actualizado');
     }
   }
