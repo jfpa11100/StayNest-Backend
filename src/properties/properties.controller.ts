@@ -3,6 +3,7 @@ import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { AuthGuard } from 'src/users/guards/auth/auth.guard';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -34,5 +35,11 @@ export class PropertiesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.propertiesService.remove(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('review')
+  addReview(@Body() createReviewDto: CreateReviewDto) {
+    return this.propertiesService.addReview(createReviewDto);
   }
 }

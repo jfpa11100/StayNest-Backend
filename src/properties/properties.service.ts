@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Property } from './entities/property.entity';
 import { Repository } from 'typeorm';
 import { Photo } from './entities/photo.entity';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -13,7 +14,7 @@ export class PropertiesService {
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
     @InjectRepository(Photo)
-    private photoRepository: Repository<Photo>,
+    private readonly photoRepository: Repository<Photo>,
   ) {}
 
   async create(createPropertyDto: CreatePropertyDto) {
@@ -21,7 +22,7 @@ export class PropertiesService {
       const { userId, photos, ...propertyData } = createPropertyDto;
       const newProperty = this.propertyRepository.create({
         ...propertyData,
-        user:{id: userId},
+        user: { id: userId },
         photos: photos.map(photo => this.photoRepository.create(photo)),
       });
       return await this.propertyRepository.save(newProperty)
@@ -34,16 +35,20 @@ export class PropertiesService {
   }
 
   async findAll() {
-    return await this.propertyRepository.find({
-      select: {
-        id:true,
-        title: true,
-        address: true,
-        pricePerNight: true,
-        capacity: true
-      },
-      relations: ['photos']
-    });
+    try {
+      return await this.propertyRepository.find({
+        select: {
+          id:true,
+          title: true,
+          address: true,
+          pricePerNight: true,
+          capacity: true
+        },
+        relations: ['photos']
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('No se pudo obtener la lista de propiedades.');
+    }
   }
   
   async findOne(id: string) {
@@ -82,9 +87,29 @@ export class PropertiesService {
   }
 
   async remove(id: string) {
-    await this.propertyRepository.delete({ id }).then((response) => {
-      if (!response.affected) throw new InternalServerErrorException("La propiedad no pudo ser eliminada");
-    });
-    return true
+    try {
+      const result = await this.propertyRepository.delete({ id });
+      if (!result.affected) throw new InternalServerErrorException('La propiedad no pudo ser eliminada');
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException('No se pudo eliminar la propiedad.');
+    }
+  }
+
+  async addReview(reviewDto: CreateReviewDto) {
+    try {
+      const review = {
+        user: { id: reviewDto.userId },
+        property: { id: reviewDto.propertyId },
+        comment: reviewDto.comment,
+        rating: reviewDto.rating
+      };
+      const savedReview = await this.propertyRepository.manager
+        .getRepository('Review') 
+        .save(review);
+      return savedReview;
+    } catch (error) {
+      throw new InternalServerErrorException('No se pudo agregar la reseña.');
+    }
   }
 }
