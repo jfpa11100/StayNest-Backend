@@ -28,17 +28,26 @@ export class BookingsService {
     }
   }
 
-  async findAll() {
+  async findAllByUser(userId:string) {
     try {
-      return await this.bookingRepository.find({
-        select: {
-          id: true,
-          startDate: true,
-          endDate: true,
-          totalPrice: true,
-        },
-        relations: ['property', 'user'], 
-      });
+      const bookings = await this.bookingRepository.createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.property', 'property')
+      .leftJoinAndSelect('property.photos', 'photo') 
+      .where('booking.userId = :userId', { userId })
+      .select([
+        'booking.id',     
+        'booking.startDate',    
+        'booking.endDate',        
+        'booking.totalPrice',     
+        'property.id',       
+        'property.title',        
+        'property.address',       
+        'property.pricePerNight',  
+        'photo.url'                
+      ])
+      .getMany();
+
+      return bookings;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('No se pudo obtener la lista de reservas.');
