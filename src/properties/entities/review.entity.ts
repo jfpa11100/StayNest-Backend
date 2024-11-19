@@ -8,7 +8,7 @@ export class Review{
     id: string
 
     @ManyToOne(() => Property, property => property.reviews,
-        { onDelete: "CASCADE" }
+        { onDelete: "CASCADE", onUpdate: "CASCADE" }
     )
     property: Property
 

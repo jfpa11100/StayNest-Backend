@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -103,8 +103,24 @@ export class PropertiesService {
     }
   }
 
-  update(id: string, updatePropertyDto: UpdatePropertyDto) {
-    return `This action updates a #${id} property`;
+  async update(id: string, updatePropertyDto: UpdatePropertyDto) {
+    try {
+      const property = await this.propertyRepository.findOne({
+        where: { id },
+        relations: ['photos', 'reviews'],
+      });
+  
+      if (!property) {
+        throw new NotFoundException('Property not found');
+      }
+      const { userId, ...updatedProperty } = updatePropertyDto 
+
+      await this.propertyRepository.save(updatedProperty);
+  
+      return updatedProperty;
+    } catch (error) {
+      throw new InternalServerErrorException('Could not update the property.');
+    }
   }
 
   async remove(id: string) {
