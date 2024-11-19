@@ -82,6 +82,27 @@ export class PropertiesService {
     return property;
   }
 
+  async findByUserId(userId: string){
+    try {
+      const properties = await this.propertyRepository.createQueryBuilder('property')
+        .leftJoinAndSelect('property.photos', 'photo') 
+        .where('property.userId = :userId', { userId }) 
+        .select([
+          'property.id',             
+          'property.title',           
+          'property.address',        
+          'property.pricePerNight',    
+          'property.capacity',          
+          'photo.url'            
+        ])
+        .getMany();
+  
+      return properties; 
+    } catch (error) {
+      throw new InternalServerErrorException('No se pudo obtener la lista de propiedades.');
+    }
+  }
+
   update(id: string, updatePropertyDto: UpdatePropertyDto) {
     return `This action updates a #${id} property`;
   }

@@ -14,6 +14,13 @@ export class PropertiesController {
     return this.propertiesService.findAll();
   }
 
+  @UseGuards(AuthGuard)
+  @Get('/user')
+  findAllByUser(@Body() body) {
+    const userId = body.userId;
+    return this.propertiesService.findByUserId(userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.propertiesService.findOne(id);
