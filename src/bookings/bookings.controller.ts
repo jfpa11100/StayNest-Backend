@@ -7,6 +7,7 @@ import { AuthGuard } from 'src/users/guards/auth/auth.guard';
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   create(@Body() createBookingDto: CreateBookingDto) {
     return this.bookingsService.create(createBookingDto);
