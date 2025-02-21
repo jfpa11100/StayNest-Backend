@@ -10,11 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.AP_DB_HOST,
-      database: process.env.AP_DB_NAME,
-      port: +process.env.AP_DB_PORT,
-      username: process.env.AP_DB_USER,
-      password: process.env.AP_DB_PASSWORD,
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       // synchronize: true
     }),
