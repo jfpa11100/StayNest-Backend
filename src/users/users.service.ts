@@ -35,8 +35,8 @@ export class UsersService {
       };
     } catch (error) {
       if (error.code === '23505') {
-        if (error.constraint === 'UQ_97672ac88f789774dd47f7c8be3') throw new BadRequestException(`Correo ${createUserDto.email} ya está asignado a otra cuenta.`);
-        throw new BadRequestException(`Usuario ${createUserDto.username} ya existe.`);
+        if (error.constraint === 'UQ_97672ac88f789774dd47f7c8be3') throw new BadRequestException(`Correo inválido`);
+        throw new BadRequestException(`Nombre de usuario no disponible`);
       }
       throw new InternalServerErrorException('No se pudo crear el usuario.');
     }
