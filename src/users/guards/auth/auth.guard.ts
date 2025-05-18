@@ -5,7 +5,7 @@ import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
 @Injectable()
 export class AuthGuard implements CanActivate {
 
-  constructor(private jwtService:JwtService) {}
+  constructor(private readonly jwtService:JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
